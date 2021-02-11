@@ -1,0 +1,25 @@
+name: Python Discord Bot CI
+
+on:
+  push:
+    branches:
+    - main
+  pull_request:
+    branches:
+    - main
+
+jobs:
+  lintMarkdown:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Lint Markdown
+      run: |
+        make lint-markdown
+  lintPython:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Lint Python
+      run: |
+        make lint-python

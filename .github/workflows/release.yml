@@ -1,0 +1,31 @@
+name: Python Discord Bot Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  lintMarkdown:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Lint Markdown
+      run: |
+        make lint-markdown
+  lintPython:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Lint Python
+      run: |
+        make lint-python
+  performRelease:
+    needs: [lintMarkdown, lintPython]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Perform Release
+        env:
+          CR_PAT: ${{ secrets.CR_PAT }}
+        run: |
+          make release VERSION=$(echo $GITHUB_REF | cut -d '/' -f 3) GITHUB_USER=${{ github.actor }}
