@@ -16,10 +16,10 @@ APP_REPO_IMAGE_NAME := ${GITHUB_REPO}/${ORGANIZATION}/${SERVICE_NAME}:${VERSION}
 APP_CONTAINER_NAME := ${APP_IMAGE_NAME}
 
 ROOT_DIRECTORY := `pwd`
-PYTHON_PATH := ${ROOT_DIRECTORY}/src/main/python
-SCRIPTS_PATH := ${ROOT_DIRECTORY}/src/main/scripts
-TEST_DIRECTORY := ${ROOT_DIRECTORY}/src/test
-TEST_PYTHON_PATH := $(PYTHON_PATH):$(TEST_DIRECTORY)/python
+MAIN_PATH := ${ROOT_DIRECTORY}/src/main
+PYTHON_PATH := ${MAIN_PATH}/python
+SCRIPTS_PATH := ${MAIN_PATH}/scripts
+COMMANDS_YAML_DIRECTORY := ${MAIN_PATH}/commands
 
 ifneq ($(DEBUG),)
   INTERACTIVE=--interactive
@@ -49,6 +49,8 @@ package: $(shell find src/main/python -name "*") docker/Dockerfile.package
 
 run-bot:
 	@export PYTHONPATH=${PYTHON_PATH}; \
+	export COMMANDS_YAML_DIRECTORY=${COMMANDS_YAML_DIRECTORY}; \
+	export DISCORD_TOKEN=${DISCORD_TOKEN}; \
 	cd ${PYTHON_PATH}; \
 	pipenv run python ../scripts/run_bot --debug
 
@@ -67,7 +69,7 @@ docker-run-bot: docker-build-app stop-bot
 		--rm \
 		${DETACH} \
 		${INTERACTIVE} \
-		--env VERSION=${VERSION} \
+		--env DISCORD_TOKEN=${DISCORD_TOKEN} \
 		--name ${APP_CONTAINER_NAME} \
 		${APP_IMAGE_NAME}
 

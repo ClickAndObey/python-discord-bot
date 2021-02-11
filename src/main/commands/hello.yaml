@@ -1,0 +1,4 @@
+commands:
+  - name: "Hello"
+    help: "Simple hello command!"
+    return: "Well Hello to you too!"

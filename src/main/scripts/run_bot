@@ -5,8 +5,10 @@ Script used to run the webservice locally.
 """
 
 from argparse import ArgumentParser
+from os import getenv
 
-from clickandobey.discord.bot.hello_bot import HelloBot
+from clickandobey.discord.bot.commands.command_loader import CommandLoader
+from clickandobey.discord.bot.command_loader_bot import CommandLoaderBot
 from clickandobey.discord.bot.logging.logger import create_logger
 
 
@@ -24,8 +26,13 @@ def main():
     """
     args = __parse_args()
     logger = create_logger(args.debug)
-    logger.info("Starting Hello Bot...")
-    HelloBot(logger)
+    logger.info("Starting Command Loader Discord Bot...")
+    command_loader = CommandLoader(logger)
+    command_loader.load_commands(getenv("COMMANDS_YAML_DIRECTORY", "/commands"))
+    command_loader.log_usage()
+
+    command_loader_bot = CommandLoaderBot(command_loader, logger)
+    command_loader_bot.run(getenv("DISCORD_TOKEN"))
     logger.info("Finished Hello Bot...")
 
 
