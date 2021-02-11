@@ -20,6 +20,28 @@ and copy the token in to an environment variable `export DISCORD_TOKEN=<Your_Tok
 Alternatively for the above command you can build a docker image based off of this bot, and overwrite the contents of
 the `/commands` directory. This allows you to remove the mount line (the one with `-v`).
 
+Example:
+
+1. Create a new file `Dockerfile`:
+
+```Dockerfile
+FROM ghcr.io/clickandobey/python-discord-bot:1.0.0
+
+COPY your_commands.yaml /commands/your_commands.yaml
+```
+
+2. Run these commands:
+
+```bash
+docker build -t <your_image_name> -f Dockerfile_from_above .
+docker run \
+    --rm \
+    -it \
+    --env DISCORD_TOKEN=${DISCORD_TOKEN} \
+    --name ${APP_CONTAINER_NAME} \
+    <your_image_name>
+```
+
 ## Quick Start
 
 1. Run `make`
