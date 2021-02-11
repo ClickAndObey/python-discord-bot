@@ -13,4 +13,6 @@ ENV PYTHON_VERSION=3.9
 COPY --from=build-base /usr/local/lib/python${PYTHON_VERSION}/site-packages/ /usr/local/lib/python${PYTHON_VERSION}/site-packages/
 COPY --from=build-base /usr/local/bin/ /usr/local/bin/
 
+COPY src/main/commands /commands
+
 ENTRYPOINT ["run_bot"]
