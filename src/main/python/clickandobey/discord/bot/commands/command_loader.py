@@ -5,6 +5,7 @@ Module containing the Hello Bot made to interact on Discord.
 import os
 import yaml
 
+from importlib import util as importlibutil
 from logging import Logger
 from typing import Dict, List
 
@@ -30,35 +31,61 @@ class CommandLoader:
 
     # Setup for the Class
 
-    def load_commands(self, yaml_file_directory: str) -> None:
+    def load_yaml_commands(self, yaml_commands_directory: str) -> None:
         """
-        Given a yaml file, load up all commands. A command has a name and a return, where the return can be a "string"
-        or a "method". If it is a method, an import will be done of the module specified.
-        :param yaml_file_directory: Directory storing the yaml files specifying the commands.
+        Given a commands directory, load up all commands specified in the yaml files.
+        :param yaml_commands_directory: Directory storing the yaml files specifying the commands.
         """
-        self.__logger.info(f"Loading commands from {yaml_file_directory}...")
-        if not os.path.exists(yaml_file_directory):
-            self.__logger.warning(f"Commands file '{yaml_file_directory}' doesn't exist.")
+        self.__logger.info(f"Loading commands from {yaml_commands_directory}...")
+        if not os.path.exists(yaml_commands_directory):
+            self.__logger.warning(f"Commands directory '{yaml_commands_directory}' doesn't exist.")
             return
 
-        for file_name in os.listdir(yaml_file_directory):
+        for file_name in os.listdir(yaml_commands_directory):
             if not file_name.endswith(".yaml"):
                 continue
 
-            yaml_file_path = os.path.join(yaml_file_directory, file_name)
+            yaml_file_path = os.path.join(yaml_commands_directory, file_name)
             with open(yaml_file_path) as yaml_file:
                 # Empty yaml returns as None, so make sure to return as at least an empty dictionary.
                 config_from_yaml = yaml.load(yaml_file, Loader=yaml.FullLoader)
-                self.__logger.info(f"Loaded configuration file {yaml_file_directory}.")
+                self.__logger.info(f"Loaded configuration file {yaml_commands_directory}.")
                 for command in config_from_yaml["commands"]:
                     command_name = command["name"]
                     if command_name in self.__commands:
                         self.__logger.warning(f"Command '{command_name}' already exists. Crashing the bot...")
                     self.__load_string_command(command_name, command["help"], command["return"])
-        self.__logger.info(f"Commands loaded from {yaml_file_directory}.")
+        self.__logger.info(f"Commands loaded from {yaml_commands_directory}.")
 
     def __load_string_command(self, command_name: str, command_help: str, return_string: str):
         self.__commands[command_name] = StringCommand(command_name, command_help, return_string)
+
+    def load_python_commands(self, python_commands_directory: str) -> None:
+        """
+        Given a commands directory, load up all commands specified in the py files. The python modules must have an
+        attribute `COMMAND` define which is of type BasicCommand.
+        :param python_commands_directory: Directory storing the yaml files specifying the commands.
+        """
+        self.__logger.info(f"Loading commands from {python_commands_directory}...")
+        if not os.path.exists(python_commands_directory):
+            self.__logger.warning(f"Commands directory '{python_commands_directory}' doesn't exist.")
+            return
+
+        for file_name in os.listdir(python_commands_directory):
+            if not file_name.endswith(".py"):
+                continue
+
+            # Taken from https://docs.python.org/3/library/importlib.html#importing-a-source-file-directly
+            file_path = os.path.join(python_commands_directory, file_name)
+            module_name = file_name.replace(".py", "")
+            self.__logger.info(f"Loading commands file {file_path}...")
+
+            spec = importlibutil.spec_from_file_location(module_name, file_path)
+            module = importlibutil.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            command: BasicCommand = module.COMMAND
+            self.__commands[command.name] = command
+            self.__logger.info(f"Commands file {file_path} loaded as '!{command.name}'")
 
     def perform_command(self, command_name: str, args: List[str]) -> str:
         """

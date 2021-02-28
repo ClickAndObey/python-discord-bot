@@ -1,7 +1,12 @@
 # Python Discord Bot
 
-Simple discord bot created in Python. Currently, it takes in a `commands.yaml` file and will return a string based on
-the command given.
+Simple discord bot created in Python. Currently, it takes in both yaml and python files to dynamically generate
+commands. The python files must individually define an attribute `COMMAND` which is of type
+`clickandobey.discord.bot.commands.function_command.FunctionCommand`, while the yaml file can load multiple commands or
+a single one depending on your preference.
+
+* [Example YAML](src/main/commands/hello.yaml)
+* [Example Python](src/main/commands/who_wins.py)
 
 ## Usage
 
@@ -27,7 +32,8 @@ Example:
 ```Dockerfile
 FROM ghcr.io/clickandobey/python-discord-bot:1.0.0
 
-COPY your_commands.yaml /commands/your_commands.yaml
+COPY python_command.py /commands/python_command.py
+COPY yaml_commands.yaml /commands/yaml_commands.yaml
 ```
 
 2. Run these commands:

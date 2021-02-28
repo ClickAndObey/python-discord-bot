@@ -14,6 +14,10 @@ class BasicCommand:
         self.__name = name
         self.__help_string = help_string
 
+    @property
+    def name(self) -> str:
+        return self.__name
+
     def usage(self) -> str:
         """
         Return the help string for the command.
