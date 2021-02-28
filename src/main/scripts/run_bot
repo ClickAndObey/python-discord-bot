@@ -28,7 +28,8 @@ def main():
     logger = create_logger(args.debug)
     logger.info("Starting Command Loader Discord Bot...")
     command_loader = CommandLoader(logger)
-    command_loader.load_commands(getenv("COMMANDS_YAML_DIRECTORY", "/commands"))
+    command_loader.load_python_commands(getenv("COMMANDS_PYTHON_DIRECTORY", "/commands"))
+    command_loader.load_yaml_commands(getenv("COMMANDS_YAML_DIRECTORY", "/commands"))
     command_loader.log_usage()
 
     command_loader_bot = CommandLoaderBot(command_loader, logger)
